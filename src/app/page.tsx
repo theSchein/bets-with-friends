@@ -5,6 +5,7 @@ import { ConnectButton } from "thirdweb/react";
 import { ThirdwebProvider } from "thirdweb/react";
 import { client, contract } from "./client";
 import CreateBetForm from "../components/CreateBetForm";
+import BetList from "../components/BetList";
 import thirdwebIcon from "@public/thirdweb.svg";
 
 export default function Home() {
@@ -29,6 +30,11 @@ export default function Home() {
             <CreateBetForm
               contract={contract}
             />
+          </div>
+          
+          <div>
+            <h2 className="text-xl mb-4">All Bets</h2>
+            <BetList contract={contract} />
           </div>
 
           <ThirdwebResources />
