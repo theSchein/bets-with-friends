@@ -1,19 +1,20 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { prepareContractCall } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
+import { ethers } from "ethers";
 
 interface CreateBetFormProps {
   contract: any;
 }
 
 const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
-  const [better1, setBetter1] = useState<string>('');
-  const [better2, setBetter2] = useState<string>('');
-  const [decider, setDecider] = useState<string>('');
-  const [wager, setWager] = useState<string>('');
-  const [conditions, setConditions] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
+  const [better1, setBetter1] = useState<string>("");
+  const [better2, setBetter2] = useState<string>("");
+  const [decider, setDecider] = useState<string>("");
+  const [wager, setWager] = useState<string>("");
+  const [conditions, setConditions] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { mutateAsync: sendTransaction } = useSendTransaction();
@@ -21,20 +22,22 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
+      const wagerInWei = ethers.utils.parseEther(wager);
+
       const transaction = prepareContractCall({
         contract,
-        method: "createBet",
-        params: [better1, better2, decider, wager, conditions]
+        method: "function createBet(address _better1, address _better2, address _decider, uint256 _wager, string _conditions)", 
+        params: [better1, better2, decider, wagerInWei.toString(), conditions],
       });
 
       await sendTransaction(transaction);
-      setMessage('Bet created successfully!');
-    } catch (error) {
-      console.error('Error creating bet:', error);
-      setMessage('Error creating bet. Please try again.');
+      setMessage("Bet created successfully!");
+    } catch (error: any) {
+      console.error("Error creating bet:", error);
+      setMessage(`Error creating bet: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +50,9 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
         <input
           id="better1"
           value={better1}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setBetter1(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setBetter1(e.target.value)
+          }
           required
         />
       </div>
@@ -56,7 +61,9 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
         <input
           id="better2"
           value={better2}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setBetter2(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setBetter2(e.target.value)
+          }
           required
         />
       </div>
@@ -65,7 +72,9 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
         <input
           id="decider"
           value={decider}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setDecider(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setDecider(e.target.value)
+          }
           required
         />
       </div>
@@ -76,7 +85,9 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
           type="number"
           step="0.000000000000000001"
           value={wager}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setWager(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setWager(e.target.value)
+          }
           required
         />
       </div>
@@ -85,12 +96,14 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
         <input
           id="conditions"
           value={conditions}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setConditions(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setConditions(e.target.value)
+          }
           required
         />
       </div>
       <button type="submit" disabled={isLoading}>
-        {isLoading ? 'Creating Bet...' : 'Create Bet'}
+        {isLoading ? "Creating Bet..." : "Create Bet"}
       </button>
       {message && <p>{message}</p>}
     </form>
