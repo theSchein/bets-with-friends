@@ -18,6 +18,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
   const [conditions, setConditions] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
 
   const { mutateAsync: sendTransaction } = useSendTransaction();
 
@@ -49,69 +50,74 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="better1">Better 1 Address or ENS</label>
-        <input
-          id="better1"
-          value={better1}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setBetter1(e.target.value)
-          }
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="better2">Better 2 Address or ENS</label>
-        <input
-          id="better2"
-          value={better2}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setBetter2(e.target.value)
-          }
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="decider">Decider Address or ENS</label>
-        <input
-          id="decider"
-          value={decider}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setDecider(e.target.value)
-          }
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="wager">Wager Amount (ETH)</label>
-        <input
-          id="wager"
-          type="number"
-          step="0.000000000000000001"
-          value={wager}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setWager(e.target.value)
-          }
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="conditions">Conditions</label>
-        <input
-          id="conditions"
-          value={conditions}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setConditions(e.target.value)
-          }
-          required
-        />
-      </div>
-      <button type="submit" disabled={isLoading}>
-        {isLoading ? "Creating Bet..." : "Create Bet"}
+    <div className="max-w-md mx-auto my-4">
+      <button
+        onClick={() => setIsFormVisible(!isFormVisible)}
+        className="w-full p-2 mb-4 bg-[var(--accent-color)] text-[var(--primary-color)] font-bold rounded"
+      >
+        {isFormVisible ? "Hide Form" : "Create a New Bet"}
       </button>
-      {message && <p>{message}</p>}
-    </form>
+      {isFormVisible && (
+        <form onSubmit={handleSubmit} className="p-6 bg-[var(--accent-color)] text-white rounded space-y-4">
+          <div>
+            <label htmlFor="better1" className="block mb-2">Better 1 Address or ENS</label>
+            <input
+              id="better1"
+              value={better1}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setBetter1(e.target.value)}
+              required
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label htmlFor="better2" className="block mb-2">Better 2 Address or ENS</label>
+            <input
+              id="better2"
+              value={better2}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setBetter2(e.target.value)}
+              required
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label htmlFor="decider" className="block mb-2">Decider Address or ENS</label>
+            <input
+              id="decider"
+              value={decider}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setDecider(e.target.value)}
+              required
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label htmlFor="wager" className="block mb-2">Wager Amount (ETH)</label>
+            <input
+              id="wager"
+              type="number"
+              step="0.000000000000000001"
+              value={wager}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setWager(e.target.value)}
+              required
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label htmlFor="conditions" className="block mb-2">Conditions</label>
+            <input
+              id="conditions"
+              value={conditions}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setConditions(e.target.value)}
+              required
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <button type="submit" disabled={isLoading} className="w-full p-2 bg-yellow-500 text-black rounded">
+            {isLoading ? "Creating Bet..." : "Create Bet"}
+          </button>
+          {message && <p className="mt-4">{message}</p>}
+        </form>
+      )}
+    </div>
   );
 };
 
