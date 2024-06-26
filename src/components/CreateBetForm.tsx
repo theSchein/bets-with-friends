@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { prepareContractCall } from "thirdweb";
+import { prepareContractCall, createThirdwebClient } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
+import { resolveAddress } from "thirdweb/extensions/ens";
 import { ethers } from "ethers";
+import { client } from "@/app/client";
 
 interface CreateBetFormProps {
   contract: any;
@@ -25,12 +27,15 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
     setMessage("");
 
     try {
+      const resolvedBetter1 = await resolveAddress({ client, name: better1 });
+      const resolvedBetter2 = await resolveAddress({ client, name: better2 });
+      const resolvedDecider = await resolveAddress({ client, name: decider });
       const wagerInWei = ethers.utils.parseEther(wager);
 
       const transaction = prepareContractCall({
         contract,
-        method: "function createBet(address _better1, address _better2, address _decider, uint256 _wager, string _conditions)", 
-        params: [better1, better2, decider, wagerInWei.toString(), conditions],
+        method: "function createBet(address _better1, address _better2, address _decider, uint256 _wager, string _conditions)",
+        params: [resolvedBetter1, resolvedBetter2, resolvedDecider, wagerInWei.toString(), conditions],
       });
 
       await sendTransaction(transaction);
@@ -46,7 +51,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="better1">Better 1 Address</label>
+        <label htmlFor="better1">Better 1 Address or ENS</label>
         <input
           id="better1"
           value={better1}
@@ -57,7 +62,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
         />
       </div>
       <div>
-        <label htmlFor="better2">Better 2 Address</label>
+        <label htmlFor="better2">Better 2 Address or ENS</label>
         <input
           id="better2"
           value={better2}
@@ -68,7 +73,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
         />
       </div>
       <div>
-        <label htmlFor="decider">Decider Address</label>
+        <label htmlFor="decider">Decider Address or ENS</label>
         <input
           id="decider"
           value={decider}
