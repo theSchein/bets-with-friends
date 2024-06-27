@@ -66,7 +66,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
               value={better1}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setBetter1(e.target.value)}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
             />
           </div>
           <div>
@@ -76,7 +76,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
               value={better2}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setBetter2(e.target.value)}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
             />
           </div>
           <div>
@@ -86,7 +86,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
               value={decider}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDecider(e.target.value)}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
             />
           </div>
           <div>
@@ -98,7 +98,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
               value={wager}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setWager(e.target.value)}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
             />
           </div>
           <div>
@@ -108,7 +108,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
               value={conditions}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setConditions(e.target.value)}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
             />
           </div>
           <button type="submit" disabled={isLoading} className="w-full p-2 bg-yellow-500 text-black rounded">
