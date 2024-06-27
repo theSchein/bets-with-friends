@@ -1,8 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useReadContract } from "thirdweb/react";
-import { getContractInstance } from "../utils/getContractInstance";
-import BetDetails from "./BetDetails";
 import { getContract } from "thirdweb";
 import { client } from "../app/client"; // Make sure this path is correct
 import { bet } from "../generated/bet"; // Import the generated bet function
@@ -24,15 +22,13 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
   });
 
   useEffect(() => {
-    console.log("useEffect triggered. betAddresses:", betAddresses);
-    console.log("accountAddress:", accountAddress);
 
     const fetchBetDetails = async () => {
       if (betAddresses && betAddresses.length > 0) {
         const open: string[] = [];
         const unfunded: string[] = [];
         const history: string[] = [];
-
+    
         for (const betAddress of betAddresses) {
           try {
             const betContract = getContract({
@@ -41,11 +37,10 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
               chain: contract.chain,
             });
             console.log("betContract:", betContract);
-
-            // Use the generated bet function
+    
             const betData = await bet({ contract: betContract });
             console.log("betData:", betData);
-
+    
             if (betData) {
               const [better1, better2, decider, , , status] = betData;
               if (
@@ -66,10 +61,14 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
             console.error(`Error fetching bet details for ${betAddress}:`, error);
           }
         }
-
+    
         setOpenBets(open);
         setUnfundedBets(unfunded);
         setBetHistory(history);
+    
+        console.log("openBets:", open);
+        console.log("unfundedBets:", unfunded);
+        console.log("betHistory:", history);
       }
     };
 
@@ -78,18 +77,29 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
 
   return (
     <div>
-      <h2>All Bets</h2>
       {isLoadingAddresses ? (
         <p>Loading bet addresses...</p>
       ) : (
-        <ul>
-          {betAddresses?.map((address: string, index: number) => (
-            <div key={index}>
-              <p>{address}</p>
-              {/* <BetDetails contract={getContractInstance(address)} /> */}
-            </div>
-          ))}
-        </ul>
+        <div>
+          <h3>Open Bets</h3>
+          <ul>
+            {openBets.map((address, index) => (
+              <li key={index}>{address}</li>
+            ))}
+          </ul>
+          <h3>Unfunded Bets</h3>
+          <ul>
+            {unfundedBets.map((address, index) => (
+              <li key={index}>{address}</li>
+            ))}
+          </ul>
+          <h3>Bet History</h3>
+          <ul>
+            {betHistory.map((address, index) => (
+              <li key={index}>{address}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
