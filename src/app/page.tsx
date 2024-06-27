@@ -13,7 +13,7 @@ import logo from "@public/bets.png";
 
 export default function Home() {
   const account = useActiveAccount();
-  const wallets = [createWallet("com.coinbase.wallet")];
+  const wallets = [createWallet("com.coinbase.wallet") , createWallet("io.metamask")];
 
   return (
     <ThirdwebProvider client={client}>

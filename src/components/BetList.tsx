@@ -4,6 +4,7 @@ import { useReadContract } from "thirdweb/react";
 import { getContract } from "thirdweb";
 import { client } from "../app/client"; 
 import { bet } from "../generated/bet"; 
+import OpenBets from "./OpenBets";
 import UnfundedBets from "./UnfundedBets";
 
 interface BetListProps {
@@ -77,12 +78,7 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
         <p>Loading bet addresses...</p>
       ) : (
         <div>
-          <h3>Open Bets</h3>
-          <ul>
-            {openBets.map((address, index) => (
-              <li key={index}>{address}</li>
-            ))}
-          </ul>
+          <OpenBets betAddresses={openBets} accountAddress={accountAddress} />
           <UnfundedBets betAddresses={unfundedBets} accountAddress={accountAddress} />
           <h3>Bet History</h3>
           <ul>
