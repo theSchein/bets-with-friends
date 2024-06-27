@@ -9,7 +9,7 @@ import { createWallet } from "thirdweb/wallets";
 import { defineChain } from "thirdweb";
 import { baseSepolia } from "thirdweb/chains";
 import Image from "next/image";
-import logo from "@public/bets.png"; // Import the logo image
+import logo from "@public/bets.png"; 
 
 export default function Home() {
   const account = useActiveAccount();
@@ -35,10 +35,11 @@ export default function Home() {
 
           {account ? (
             <div>
+              {/* <p>Account : {account.address}</p> */}
+
               <CreateBetForm contract={contract} />
 
-              <h2 className="text-2xl mb-4 text-[var(--primary-color)]">My Bets</h2>
-              <BetList contract={contract} />
+              <BetList contract={contract} accountAddress={account.address}/>
             </div>
           ) : (
             <Pitch />

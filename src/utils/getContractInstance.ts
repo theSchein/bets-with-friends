@@ -1,12 +1,9 @@
-import { getContract } from "thirdweb";
-import { client } from "../app/client";
-import { defineChain } from "thirdweb/chains";
+import { useReadContract } from "thirdweb/react";
 
-// Function to get contract instance
-export function getContractInstance(contractAddress: string) {
-  return getContract({
-    client,
-    chain: defineChain(84532), // Make sure this matches your chain ID
-    address: contractAddress,
+export default function Component() {
+  const { data, isLoading } = useReadContract({ 
+    contract, 
+    method: "function getBets() view returns (address[])", 
+    params: [] 
   });
 }
