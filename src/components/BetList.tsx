@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useReadContract } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { client } from "../app/client"; // Make sure this path is correct
-import { bet } from "../generated/bet"; // Import the generated bet function
+import { client } from "../app/client"; 
+import { bet } from "../generated/bet"; 
+import UnfundedBets from "./UnfundedBets";
 
 interface BetListProps {
   contract: any;
@@ -36,10 +37,8 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
               address: betAddress,
               chain: contract.chain,
             });
-            console.log("betContract:", betContract);
     
             const betData = await bet({ contract: betContract });
-            console.log("betData:", betData);
     
             if (betData) {
               const [better1, better2, decider, , , status] = betData;
@@ -66,9 +65,6 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
         setUnfundedBets(unfunded);
         setBetHistory(history);
     
-        console.log("openBets:", open);
-        console.log("unfundedBets:", unfunded);
-        console.log("betHistory:", history);
       }
     };
 
@@ -87,12 +83,7 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
               <li key={index}>{address}</li>
             ))}
           </ul>
-          <h3>Unfunded Bets</h3>
-          <ul>
-            {unfundedBets.map((address, index) => (
-              <li key={index}>{address}</li>
-            ))}
-          </ul>
+          <UnfundedBets betAddresses={unfundedBets} accountAddress={accountAddress} />
           <h3>Bet History</h3>
           <ul>
             {betHistory.map((address, index) => (
