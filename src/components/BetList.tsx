@@ -6,6 +6,7 @@ import { client } from "../app/client";
 import { bet } from "../generated/bet"; 
 import OpenBets from "./OpenBets";
 import UnfundedBets from "./UnfundedBets";
+import BetHistory from "./BetHistory";
 
 interface BetListProps {
   contract: any;
@@ -80,12 +81,7 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
         <div>
           <OpenBets betAddresses={openBets} accountAddress={accountAddress} />
           <UnfundedBets betAddresses={unfundedBets} accountAddress={accountAddress} />
-          <h3>Bet History</h3>
-          <ul>
-            {betHistory.map((address, index) => (
-              <li key={index}>{address}</li>
-            ))}
-          </ul>
+          <BetHistory betAddresses={betHistory} accountAddress={accountAddress} />
         </div>
       )}
     </div>
