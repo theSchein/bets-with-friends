@@ -277,41 +277,6 @@ export async function hasFunded(
 };
 
 
-
-
-/**
- * Calls the "totalFunded" function on the contract.
- * @param options - The options for the totalFunded function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { totalFunded } from "TODO";
- * 
- * const result = await totalFunded();
- * 
- * ```
- */
-export async function totalFunded(
-  options: BaseTransactionOptions
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0xad044f49",
-  [],
-  [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ]
-],
-    params: []
-  });
-};
-
-
 /**
 * Contract write functions
 */

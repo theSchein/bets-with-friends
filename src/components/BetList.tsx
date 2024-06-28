@@ -44,14 +44,15 @@ const BetList: React.FC<BetListProps> = ({ contract, accountAddress }) => {
     
             if (betData) {
               const [better1, better2, decider, , , status] = betData;
+              console.log("status:", status);
               if (
                 accountAddress.toLowerCase() === better1.toLowerCase() ||
                 accountAddress.toLowerCase() === better2.toLowerCase() ||
                 accountAddress.toLowerCase() === decider.toLowerCase()
               ) {
-                if (status === 0) {
+                if (betData && (betData[5] === 0 || betData[5] === 1)) {
                   unfunded.push(betAddress);
-                } else if (status === 1 || status === 2) {
+                } else if (status === 3 ) {
                   open.push(betAddress);
                 } else {
                   history.push(betAddress);
