@@ -26,7 +26,6 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
 
       for (const betAddress of betAddresses) {
         try {
-          console.log(`Processing bet address: ${betAddress}`);
           const betContract = getContract({
             client,
             address: betAddress,
@@ -34,10 +33,8 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
           });
 
           const betData = await bet({ contract: betContract });
-          console.log("Bet data:", betData);
 
           if (betData) {
-            console.log("Resolving ENS names...");
             const [better1, better2, decider] = await Promise.all([
               resolveName({ client, address: betData[0] }).catch(() => null),
               resolveName({ client, address: betData[1] }).catch(() => null),
@@ -46,9 +43,12 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
 
             details.push({
               address: betAddress,
-              better1: better1 || betData[0],
-              better2: better2 || betData[1],
-              decider: decider || betData[2],
+              better1: betData[0],
+              better1Display: better1 || betData[0],
+              better2: betData[1],
+              better2Display: better2 || betData[1],
+              decider: betData[2],
+              deciderDisplay: decider || betData[2],
               wagerWei: betData[3].toString(),
               wagerEth: ethers.utils.formatEther(betData[3]),
               conditions: betData[4],
@@ -122,11 +122,11 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
             <div key={index} className="p-4 bg-blue-800 text-white rounded mb-2 shadow-lg">
               <h4 className="text-xl font-bold mb-2">{bet.conditions}</h4>
               <div className="flex justify-between mb-2">
-                <span>Better 1: {bet.better1.endsWith('.eth') ? bet.better1 : shortenAddress(bet.better1)}</span>
-                <span>Better 2: {bet.better2.endsWith('.eth') ? bet.better2 : shortenAddress(bet.better2)}</span>
+                <span>Better 1: {bet.better1Display.endsWith('.eth') ? bet.better1Display : shortenAddress(bet.better1Display)}</span>
+                <span>Better 2: {bet.better2Display.endsWith('.eth') ? bet.better2Display : shortenAddress(bet.better2Display)}</span>
               </div>
               <div className="flex justify-between mb-2">
-                <span>Decider: {bet.decider.endsWith('.eth') ? bet.decider : shortenAddress(bet.decider)}</span>
+                <span>Decider: {bet.deciderDisplay.endsWith('.eth') ? bet.deciderDisplay : shortenAddress(bet.deciderDisplay)}</span>
                 <span>Wager: {bet.wagerEth} ETH</span>
               </div>
               {address === bet.decider.toLowerCase() ? (

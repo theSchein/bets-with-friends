@@ -34,7 +34,6 @@ const BetHistory: React.FC<BetHistoryProps> = ({ betAddresses, accountAddress })
 
       for (const betAddress of betAddresses) {
         try {
-          console.log(`Processing bet address: ${betAddress}`);
           const betContract = getContract({
             client,
             address: betAddress,
@@ -42,10 +41,8 @@ const BetHistory: React.FC<BetHistoryProps> = ({ betAddresses, accountAddress })
           });
 
           const betData = await bet({ contract: betContract });
-          console.log("Bet data:", betData);
 
           if (betData) {
-            console.log("Resolving ENS names...");
             const [better1, better2, decider, winner] = await Promise.all([
               resolveName({ client, address: betData[0] }).catch(() => null),
               resolveName({ client, address: betData[1] }).catch(() => null),

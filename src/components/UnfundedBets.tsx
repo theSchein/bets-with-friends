@@ -14,7 +14,10 @@ interface UnfundedBetsProps {
   accountAddress: string;
 }
 
-const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddress }) => {
+const UnfundedBets: React.FC<UnfundedBetsProps> = ({
+  betAddresses,
+  accountAddress,
+}) => {
   const [betDetails, setBetDetails] = useState<any[]>([]);
   const [ethToUsdRate, setEthToUsdRate] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(true);
@@ -24,7 +27,9 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddres
   useEffect(() => {
     const fetchEthToUsdRate = async () => {
       try {
-        const response = await fetch("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD");
+        const response = await fetch(
+          "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD"
+        );
         const data = await response.json();
         setEthToUsdRate(data.USD);
       } catch (error) {
@@ -49,8 +54,16 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddres
 
           const betData = await bet({ contract: betContract });
 
-          if (betData && (betData[5] === 0 || betData[5] === 1 || betData[5] === 2)) { // 0 for Unfunded, 1 for Better1Funded, 2 for Better2Funded
-            const [better1, better2, decider] = [betData[0], betData[1], betData[2]];
+          if (
+            betData &&
+            (betData[5] === 0 || betData[5] === 1 || betData[5] === 2)
+          ) {
+            // 0 for Unfunded, 1 for Better1Funded, 2 for Better2Funded
+            const [better1, better2, decider] = [
+              betData[0],
+              betData[1],
+              betData[2],
+            ];
             const [better1ens, better2ens, deciderens] = await Promise.all([
               resolveName({ client, address: betData[0] }).catch(() => null),
               resolveName({ client, address: betData[1] }).catch(() => null),
@@ -97,7 +110,11 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddres
       alert("Bet funded successfully!");
     } catch (error) {
       console.error("Error funding bet:", error);
-      alert(`Error funding bet. Please try again. Details: ${error.message || error}`);
+      alert(
+        `Error funding bet. Please try again. Details: ${
+          error.message || error
+        }`
+      );
     }
   };
 
@@ -117,13 +134,22 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddres
       alert("Bet canceled successfully!");
     } catch (error) {
       console.error("Error canceling bet:", error);
-      alert(`Error canceling bet. Please try again. Details: ${error.message || error}`);
+      alert(
+        `Error canceling bet. Please try again. Details: ${
+          error.message || error
+        }`
+      );
     }
   };
 
-  const shortenAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const shortenAddress = (address: string) =>
+    `${address.slice(0, 6)}...${address.slice(-4)}`;
 
-  const getBetStatusText = (status: number, better1: string, better2: string) => {
+  const getBetStatusText = (
+    status: number,
+    better1: string,
+    better2: string
+  ) => {
     switch (status) {
       case 0:
         return "Unfunded";
@@ -138,25 +164,51 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddres
 
   return (
     <div className="my-4 p-4 bg-blue-600 text-white rounded">
-      <h3 className="text-lg font-bold mb-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <h3
+        className="text-lg font-bold mb-2 cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         Unfunded and Partially Funded Bets
       </h3>
       <Collapse in={isOpen}>
         {betDetails.map((bet, index) => {
-          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(2);
-          const canFund = (address === bet.better1.toLowerCase() && bet.status !== 1) || 
-                          (address === bet.better2.toLowerCase() && bet.status !== 2);
+          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(
+            2
+          );
+          const canFund =
+            (address === bet.better1.toLowerCase() && bet.status !== 1) ||
+            (address === bet.better2.toLowerCase() && bet.status !== 2);
 
           return (
-            <div key={index} className="p-4 bg-blue-800 text-white rounded mb-2 shadow-lg">
+            <div
+              key={index}
+              className="p-4 bg-blue-800 text-white rounded mb-2 shadow-lg"
+            >
               <h4 className="text-xl font-bold mb-2">{bet.conditions}</h4>
               <div className="flex justify-between mb-2">
-                <span>Better 1: {bet.better1Display.endsWith('.eth') ? bet.better1Display : shortenAddress(bet.better1Display)}</span>
-                <span>Better 2: {bet.better2Display.endsWith('.eth') ? bet.better2Display : shortenAddress(bet.better2Display)}</span>
+                <span>
+                  Better 1:{" "}
+                  {bet.better1Display.endsWith(".eth")
+                    ? bet.better1Display
+                    : shortenAddress(bet.better1Display)}
+                </span>
+                <span>
+                  Better 2:{" "}
+                  {bet.better2Display.endsWith(".eth")
+                    ? bet.better2Display
+                    : shortenAddress(bet.better2Display)}
+                </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span>Decider: {bet.deciderDisplay.endsWith('.eth') ? bet.deciderDisplay : shortenAddress(bet.deciderDisplay)}</span>
-                <span>Wager: {bet.wagerEth} ETH (${wagerInUsd} USD)</span>
+                <span>
+                  Decider:{" "}
+                  {bet.deciderDisplay.endsWith(".eth")
+                    ? bet.deciderDisplay
+                    : shortenAddress(bet.deciderDisplay)}
+                </span>
+                <span>
+                  Wager: {bet.wagerEth} ETH (${wagerInUsd} USD)
+                </span>
               </div>
               <div className="mb-2">
                 Status: {getBetStatusText(bet.status, bet.better1, bet.better2)}
@@ -173,6 +225,12 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({ betAddresses, accountAddres
               ) : (
                 <p>You have already funded this bet.</p>
               )}
+              <button
+                onClick={() => handleCancelBet(bet.address)}
+                className="w-full p-2 bg-red-500 text-white rounded mt-2 hover:bg-red-400 transition-colors"
+              >
+                Cancel Bet
+              </button>
             </div>
           );
         })}
