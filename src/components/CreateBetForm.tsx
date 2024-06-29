@@ -88,12 +88,12 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-4">
+    <div className="max-w-md mx-auto my-4 p-4 bg-primary text-quaternary rounded-lg shadow-lg">
       <button
         onClick={() => setIsFormVisible(!isFormVisible)}
-        className="w-full p-2 bg-primary text-quaternary font-bold font-heading rounded"
+        className="text-lg w-full p-2 bg-primary text-quaternary font-bold font-heading rounded"
       >
-        {isFormVisible ? "Hide Form" : "Create a New Bet"}
+        {isFormVisible ? "Hide Form" : "Make a Bet"}
       </button>
       <Collapse in={isFormVisible}>
         <form onSubmit={handleSubmit} className="p-6 bg-secondary text-font rounded space-y-4 shadow-lg">
@@ -160,7 +160,7 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
             </div>
           </Tooltip>
           <button type="submit" disabled={isLoading} className="w-full p-4 bg-tertiary text-font font-heading rounded-lg hover:bg-quaternary transition-colors">
-            {isLoading ? "Creating Bet..." : "Create Bet"}
+            {isLoading ? "Creating Bet..." : "Make Bet"}
           </button>
           {message && <p className="mt-4">{message}</p>}
         </form>

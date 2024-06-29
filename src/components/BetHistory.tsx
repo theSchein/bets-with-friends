@@ -1,3 +1,4 @@
+// components/BetHistory.js
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,7 +7,8 @@ import { ethers } from "ethers";
 import { client, contract } from "@/app/client";
 import { bet } from "../generated/bet";
 import { resolveName } from "thirdweb/extensions/ens";
-import { Collapse } from "@mui/material"; // Import MUI Collapse for collapsibility
+import { Collapse } from "@mui/material";
+import BetCard from "./BetCard";
 
 interface BetHistoryProps {
   betAddresses: string[];
@@ -19,10 +21,26 @@ const BetHistory: React.FC<BetHistoryProps> = ({ betAddresses, accountAddress })
     betsWon: 0,
     betsLost: 0,
     betsDecided: 0,
-    pnl: 0,
+    pnlEth: 0,
+    pnlUsd: 0,
   });
   const address = accountAddress.toLowerCase();
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [ethToUsdRate, setEthToUsdRate] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchEthToUsdRate = async () => {
+      try {
+        const response = await fetch("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD");
+        const data = await response.json();
+        setEthToUsdRate(data.USD);
+      } catch (error) {
+        console.error("Error fetching ETH to USD rate:", error);
+      }
+    };
+
+    fetchEthToUsdRate();
+  }, []);
 
   useEffect(() => {
     const fetchBetDetails = async () => {
@@ -30,7 +48,8 @@ const BetHistory: React.FC<BetHistoryProps> = ({ betAddresses, accountAddress })
       let betsWon = 0;
       let betsLost = 0;
       let betsDecided = 0;
-      let pnl = 0;
+      let pnlEth = 0;
+      let pnlUsd = 0;
 
       for (const betAddress of betAddresses) {
         try {
@@ -47,31 +66,42 @@ const BetHistory: React.FC<BetHistoryProps> = ({ betAddresses, accountAddress })
               resolveName({ client, address: betData[0] }).catch(() => null),
               resolveName({ client, address: betData[1] }).catch(() => null),
               resolveName({ client, address: betData[2] }).catch(() => null),
-              resolveName({ client, address: betData[6] }).catch(() => null),
+              betData[6] !== "0x0000000000000000000000000000000000000000"
+                ? resolveName({ client, address: betData[6] }).catch(() => null)
+                : null,
             ]);
 
-            const isWinner = winner && winner.toLowerCase() === address;
-            const isDecider = decider && decider.toLowerCase() === address;
+            const isWinner = betData[6].toLowerCase() === address;
+            const isDecider = betData[2].toLowerCase() === address;
 
-            if (betData[5] === 3 || betData[5] === 4) { // Resolved or Invalid status
+            if (betData[5] === 4 || betData[5] === 5) { // Resolved or Invalid status
               details.push({
                 address: betAddress,
-                better1: better1 || betData[0],
-                better2: better2 || betData[1],
-                decider: decider || betData[2],
+                better1: betData[0],
+                better1Display: better1 || betData[0],
+                better2: betData[1],
+                better2Display: better2 || betData[1],
+                decider: betData[2],
+                deciderDisplay: decider || betData[2],
                 wagerWei: betData[3].toString(),
-                wagerEth: ethers.utils.formatEther(betData[3]),
+                wagerEth: parseFloat(ethers.utils.formatEther(betData[3])).toFixed(4), // Rounded to 4 decimals
                 conditions: betData[4],
                 status: betData[5],
-                winner: winner || betData[6],
+                winner: betData[6],
+                winnerDisplay: winner || betData[6],
               });
 
-              if (isWinner) {
-                betsWon += 1;
-                pnl += parseFloat(ethers.utils.formatEther(betData[3]));
-              } else if (!isDecider) {
-                betsLost += 1;
-                pnl -= parseFloat(ethers.utils.formatEther(betData[3]));
+              if (betData[5] === 4) { // Only count resolved bets
+                const wagerEth = parseFloat(ethers.utils.formatEther(betData[3]));
+                if (isWinner) {
+                  betsWon += 1;
+                  pnlEth += wagerEth;
+                  pnlUsd += wagerEth * ethToUsdRate;
+                } else if (address === betData[0].toLowerCase() || address === betData[1].toLowerCase()) {
+                  betsLost += 1;
+                  pnlEth -= wagerEth;
+                  pnlUsd -= wagerEth * ethToUsdRate;
+                }
               }
 
               if (isDecider) {
@@ -85,48 +115,44 @@ const BetHistory: React.FC<BetHistoryProps> = ({ betAddresses, accountAddress })
       }
 
       setBetDetails(details);
-      setStats({ betsWon, betsLost, betsDecided, pnl });
+      setStats({ betsWon, betsLost, betsDecided, pnlEth, pnlUsd });
     };
 
     fetchBetDetails();
-  }, [betAddresses, address]);
-
-  const shortenAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }, [betAddresses, address, ethToUsdRate]);
 
   return (
-    <div className="my-4 p-4 bg-green-600 text-white rounded">
+    <div className="max-w-md mx-auto my-4 p-4 bg-primary text-quaternary rounded-lg shadow-lg">
       <h3 className="text-lg font-bold mb-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
         Bet History
       </h3>
       <Collapse in={isOpen}>
-        <div className="p-4 bg-green-800 text-white rounded mb-4 shadow-lg">
-          <h4 className="text-xl font-bold mb-2">Statistics</h4>
-          <p>Bets Won: {stats.betsWon}</p>
-          <p>Bets Lost: {stats.betsLost}</p>
-          <p>Bets Decided: {stats.betsDecided}</p>
-          <p>Profit and Loss (PnL): {stats.pnl.toFixed(2)} ETH</p>
+        <div className="p-4 bg-secondary rounded-lg shadow-md mb-4">
+          <h4 className="text-xl font-bold mb-2 text-font">Record</h4>
+          <table className="w-full text-left text-font">
+            <tbody>
+              <tr>
+                <th className="font-semibold">Bets Won:</th>
+                <td>{stats.betsWon}</td>
+              </tr>
+              <tr>
+                <th className="font-semibold">Bets Lost:</th>
+                <td>{stats.betsLost}</td>
+              </tr>
+              <tr>
+                <th className="font-semibold">Bets Decided:</th>
+                <td>{stats.betsDecided}</td>
+              </tr>
+              <tr>
+                <th className="font-semibold">Profit and Loss:</th>
+                <td>$  {stats.pnlUsd.toFixed(2)} ({stats.pnlEth.toFixed(4)} ETH)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        {betDetails.map((bet, index) => {
-          console.log(`Rendering bet ${index}:`, bet);
-
-          return (
-            <div key={index} className="p-4 bg-green-800 text-white rounded mb-2 shadow-lg">
-              <h4 className="text-xl font-bold mb-2">{bet.conditions}</h4>
-              <div className="flex justify-between mb-2">
-                <span>Better 1: {bet.better1.endsWith('.eth') ? bet.better1 : shortenAddress(bet.better1)}</span>
-                <span>Better 2: {bet.better2.endsWith('.eth') ? bet.better2 : shortenAddress(bet.better2)}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>Decider: {bet.decider.endsWith('.eth') ? bet.decider : shortenAddress(bet.decider)}</span>
-                <span>Wager: {bet.wagerEth} ETH</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>Status: {bet.status === 3 ? "Resolved" : "Invalidated"}</span>
-                <span>Winner: {bet.winner.endsWith('.eth') ? bet.winner : shortenAddress(bet.winner)}</span>
-              </div>
-            </div>
-          );
-        })}
+        {betDetails.map((bet, index) => (
+          <BetCard key={index} bet={bet} ethToUsdRate={ethToUsdRate} address={address} />
+        ))}
       </Collapse>
     </div>
   );
