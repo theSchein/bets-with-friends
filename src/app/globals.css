@@ -1,29 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
-
 :root {
-    --bg-color: #AEDFF7;
-    --primary-color: #FFD700;
-    --accent-color: #1A3A6F;
-    --text-color: #FFFFFF;
-
-    line-height: 1.5;
-    font-weight: 400;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-family: 'Luckiest Guy', sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    font-variation-settings: 'slnt' 0;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
 @layer base {
-    body {
-        @apply bg-[var(--bg-color)] text-[var(--text-color)];
-    }
+  body {
+    @apply font-body bg-geometric-circle from-primary to-quaternary;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
 }

@@ -8,13 +8,29 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ["'Luckiest Guy'", "cursive"],
+        body: ["'Comic Sans MS'", "sans-serif"],
+      },
+      colors: {
+        primary: "#03AED2",
+        secondary: "#68D2E8",
+        tertiary: "#FDDE55",
+        quaternary: "#FEEFAD",
+        font: "#071952",
+      },
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        'geometric-circle': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
+      },
+      gradientColorStops: {
+        from: '#03AED2',
+        to: 'rgba(3, 174, 210, 0)', // Transparent primary color
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwindcss-bg-patterns'), // Ensure you have this plugin installed
+  ],
 };
+
 export default config;
