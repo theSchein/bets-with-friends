@@ -68,7 +68,7 @@ function Pitch() {
           Make a bet between you and a friend, then pick a decider that both of you trust!
         </p>
         <p className="text-lg md:text-xl text-font mb-2">
-          Once each side pays the wager, the bet is on. Only the decider can pick a winner or cancel it to refund the wagers.
+          Once each side pays the wager, the bet is on. Only the decider can pick a winner or cancel it to refund the betters.
         </p>
         <p className="text-lg md:text-xl text-font">
           The decider doesn't get any of the money. They can only decide where the money goes.

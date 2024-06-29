@@ -1,3 +1,4 @@
+// components/UnfundedBets.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import { client, contract } from "@/app/client";
 import { bet, fundBet, cancelBet } from "../generated/bet";
 import { resolveName } from "thirdweb/extensions/ens";
 import { Collapse } from "@mui/material";
+import AlertModal from "./AlertModal";
 
 interface UnfundedBetsProps {
   betAddresses: string[];
@@ -23,6 +25,8 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const address = accountAddress.toLowerCase();
   const { mutateAsync: sendTransaction } = useSendTransaction();
+  const [message, setMessage] = useState<string>("");
+  const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchEthToUsdRate = async () => {
@@ -40,57 +44,57 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
     fetchEthToUsdRate();
   }, []);
 
-  useEffect(() => {
-    const fetchBetDetails = async () => {
-      const details: any[] = [];
+  const fetchBetDetails = async () => {
+    const details: any[] = [];
 
-      for (const betAddress of betAddresses) {
-        try {
-          const betContract = getContract({
-            client,
+    for (const betAddress of betAddresses) {
+      try {
+        const betContract = getContract({
+          client,
+          address: betAddress,
+          chain: contract.chain,
+        });
+
+        const betData = await bet({ contract: betContract });
+
+        if (
+          betData &&
+          (betData[5] === 0 || betData[5] === 1 || betData[5] === 2)
+        ) {
+          // 0 for Unfunded, 1 for Better1Funded, 2 for Better2Funded
+          const [better1, better2, decider] = [
+            betData[0],
+            betData[1],
+            betData[2],
+          ];
+          const [better1ens, better2ens, deciderens] = await Promise.all([
+            resolveName({ client, address: betData[0] }).catch(() => null),
+            resolveName({ client, address: betData[1] }).catch(() => null),
+            resolveName({ client, address: betData[2] }).catch(() => null),
+          ]);
+          details.push({
             address: betAddress,
-            chain: contract.chain,
+            better1: better1,
+            better1Display: better1ens || better1,
+            better2: better2,
+            better2Display: better2ens || better2,
+            decider: decider,
+            deciderDisplay: deciderens || decider,
+            wagerWei: betData[3].toString(),
+            wagerEth: parseFloat(ethers.utils.formatEther(betData[3])).toFixed(4), // Rounded to 4 decimals
+            conditions: betData[4],
+            status: betData[5],
           });
-
-          const betData = await bet({ contract: betContract });
-
-          if (
-            betData &&
-            (betData[5] === 0 || betData[5] === 1 || betData[5] === 2)
-          ) {
-            // 0 for Unfunded, 1 for Better1Funded, 2 for Better2Funded
-            const [better1, better2, decider] = [
-              betData[0],
-              betData[1],
-              betData[2],
-            ];
-            const [better1ens, better2ens, deciderens] = await Promise.all([
-              resolveName({ client, address: betData[0] }).catch(() => null),
-              resolveName({ client, address: betData[1] }).catch(() => null),
-              resolveName({ client, address: betData[2] }).catch(() => null),
-            ]);
-            details.push({
-              address: betAddress,
-              better1: better1,
-              better1Display: better1ens || better1,
-              better2: better2,
-              better2Display: better2ens || better2,
-              decider: decider,
-              deciderDisplay: deciderens || decider,
-              wagerWei: betData[3].toString(),
-              wagerEth: ethers.utils.formatEther(betData[3]),
-              conditions: betData[4],
-              status: betData[5],
-            });
-          }
-        } catch (error) {
-          console.error(`Error fetching bet details for ${betAddress}:`, error);
         }
+      } catch (error) {
+        console.error(`Error fetching bet details for ${betAddress}:`, error);
       }
+    }
 
-      setBetDetails(details);
-    };
+    setBetDetails(details);
+  };
 
+  useEffect(() => {
     fetchBetDetails();
   }, [betAddresses, address]);
 
@@ -107,14 +111,17 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
       });
 
       await sendTransaction({ ...transaction, value: wagerWei });
-      alert("Bet funded successfully!");
+      setMessage("Bet funded successfully!");
+      setIsAlertOpen(true);
+      fetchBetDetails(); // Refresh bet details
     } catch (error) {
       console.error("Error funding bet:", error);
-      alert(
+      setMessage(
         `Error funding bet. Please try again. Details: ${
           error.message || error
         }`
       );
+      setIsAlertOpen(true);
     }
   };
 
@@ -131,14 +138,17 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
       });
 
       await sendTransaction(transaction);
-      alert("Bet canceled successfully!");
+      setMessage("Bet canceled successfully!");
+      setIsAlertOpen(true);
+      fetchBetDetails(); // Refresh bet details
     } catch (error) {
       console.error("Error canceling bet:", error);
-      alert(
+      setMessage(
         `Error canceling bet. Please try again. Details: ${
           error.message || error
         }`
       );
+      setIsAlertOpen(true);
     }
   };
 
@@ -154,27 +164,25 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
       case 0:
         return "Unfunded";
       case 1:
-        return `Partially Funded (${shortenAddress(better1)} has funded)`;
+        return `Partially Funded (${(better1)} has funded)`;
       case 2:
-        return `Partially Funded (${shortenAddress(better2)} has funded)`;
+        return `Partially Funded (${(better2)} has funded)`;
       default:
         return "Unknown Status";
     }
   };
 
   return (
-    <div className="my-4 p-4 bg-blue-600 text-white rounded">
+    <div className="max-w-md mx-auto my-4 p-4 bg-primary text-quaternary rounded-lg shadow-lg">
       <h3
         className="text-lg font-bold mb-2 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
-        Unfunded and Partially Funded Bets
+        Unfunded Bets
       </h3>
       <Collapse in={isOpen}>
         {betDetails.map((bet, index) => {
-          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(
-            2
-          );
+          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(2);
           const canFund =
             (address === bet.better1.toLowerCase() && bet.status !== 1) ||
             (address === bet.better2.toLowerCase() && bet.status !== 2);
@@ -182,52 +190,58 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
           return (
             <div
               key={index}
-              className="p-4 bg-blue-800 text-white rounded mb-2 shadow-lg"
+              className="p-4 mb-4 bg-secondary rounded-lg shadow-md"
             >
-              <h4 className="text-xl font-bold mb-2">{bet.conditions}</h4>
-              <div className="flex justify-between mb-2">
-                <span>
-                  Better 1:{" "}
-                  {bet.better1Display.endsWith(".eth")
-                    ? bet.better1Display
-                    : shortenAddress(bet.better1Display)}
-                </span>
-                <span>
-                  Better 2:{" "}
-                  {bet.better2Display.endsWith(".eth")
-                    ? bet.better2Display
-                    : shortenAddress(bet.better2Display)}
-                </span>
+              <h4 className="text-xl font-bold mb-2 text-font">{bet.conditions}</h4>
+              <div className="grid grid-cols-1 gap-4 mb-2">
+                <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
+                  <span>
+                    Better 1:{" "}
+                    {bet.better1Display.endsWith(".eth")
+                      ? bet.better1Display
+                      : shortenAddress(bet.better1Display)}
+                  </span>
+                </div>
+                <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
+                  <span>
+                    Better 2:{" "}
+                    {bet.better2Display.endsWith(".eth")
+                      ? bet.better2Display
+                      : shortenAddress(bet.better2Display)}
+                  </span>
+                </div>
+                <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
+                  <span>
+                    Decider:{" "}
+                    {bet.deciderDisplay.endsWith(".eth")
+                      ? bet.deciderDisplay
+                      : shortenAddress(bet.deciderDisplay)}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between mb-2">
-                <span>
-                  Decider:{" "}
-                  {bet.deciderDisplay.endsWith(".eth")
-                    ? bet.deciderDisplay
-                    : shortenAddress(bet.deciderDisplay)}
-                </span>
-                <span>
-                  Wager: {bet.wagerEth} ETH (${wagerInUsd} USD)
-                </span>
+              <div className="mb-2 text-font">
+                Wager: ${wagerInUsd} USD ({bet.wagerEth} ETH)
               </div>
               <div className="mb-2">
-                Status: {getBetStatusText(bet.status, bet.better1, bet.better2)}
+                <span className="inline-block px-4 py-2 bg-blue-500 text-white rounded-full">
+                  {getBetStatusText(bet.status, bet.better1Display, bet.better2Display)}
+                </span>
               </div>
               {canFund ? (
                 <button
                   onClick={() => handleFundBet(bet.address, bet.wagerWei)}
-                  className="w-full p-2 bg-yellow-500 text-black rounded mt-2 hover:bg-yellow-400 transition-colors"
+                  className="w-full p-2 bg-green-500 text-font font-heading rounded-lg mt-2 hover:bg-yellow-400 transition-colors"
                 >
                   Fund Bet
                 </button>
               ) : address === bet.decider.toLowerCase() ? (
-                <p>You are the decider for this bet.</p>
+                <p className="text-font">You are the decider for this bet.</p>
               ) : (
-                <p>You have already funded this bet.</p>
+                <p className="text-font">You have already funded this bet.</p>
               )}
               <button
                 onClick={() => handleCancelBet(bet.address)}
-                className="w-full p-2 bg-red-500 text-white rounded mt-2 hover:bg-red-400 transition-colors"
+                className="w-full p-2 bg-red-500 text-font font-heading rounded-lg mt-2 hover:bg-red-400 transition-colors"
               >
                 Cancel Bet
               </button>
@@ -235,6 +249,7 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
           );
         })}
       </Collapse>
+      <AlertModal isOpen={isAlertOpen} message={message} onClose={() => setIsAlertOpen(false)} />
     </div>
   );
 };
