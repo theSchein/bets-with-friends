@@ -24,12 +24,12 @@ const config: Config = {
       },
       gradientColorStops: {
         from: '#03AED2',
-        to: 'rgba(3, 174, 210, 0)', // Transparent primary color
+        to: 'rgba(3, 174, 210, 0)', 
       },
     },
   },
   plugins: [
-    require('tailwindcss-bg-patterns'), // Ensure you have this plugin installed
+    require('tailwindcss-bg-patterns'), 
   ],
 };
 
