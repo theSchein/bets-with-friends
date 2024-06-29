@@ -5,5 +5,5 @@ export function useUserAddress() {
 
   if (!sdk) return null;
 
-  return sdk.wallet.address;
+  return sdk.wallet.getAddress();
 }

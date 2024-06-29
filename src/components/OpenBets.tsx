@@ -16,6 +16,10 @@ interface OpenBetsProps {
   accountAddress: string;
 }
 
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
 const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => {
   const [betDetails, setBetDetails] = useState<any[]>([]);
   const address = accountAddress.toLowerCase();
@@ -92,19 +96,26 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
         address: betAddress,
         chain: contract.chain,
       });
-
+  
+      // Ensure the winnerAddress is a valid Ethereum address
+      const formattedWinnerAddress = ethers.utils.getAddress(winnerAddress) as `0x${string}`;
+  
       const transaction = resolveBet({
         contract: betContract,
-        winner: winnerAddress,
+        winner: formattedWinnerAddress,
       });
-
+  
       await sendTransaction(transaction);
       setMessage("Bet resolved successfully!");
       setIsAlertOpen(true);
       fetchBetDetails(); // Refresh bet details
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error resolving bet:", error);
-      setMessage(`Error resolving bet. Please try again. Details: ${error.message || error}`);
+      if (isError(error)) {
+        setMessage(`Error resolving bet. Please try again. Details: ${error.message}`);
+      } else {
+        setMessage(`Error resolving bet. Please try again. An unexpected error occurred.`);
+      }
       setIsAlertOpen(true);
     }
   };
@@ -116,18 +127,22 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
         address: betAddress,
         chain: contract.chain,
       });
-
+  
       const transaction = invalidateBet({
         contract: betContract,
       });
-
+  
       await sendTransaction(transaction);
       setMessage("Bet invalidated successfully!");
       setIsAlertOpen(true);
       fetchBetDetails(); // Refresh bet details
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error invalidating bet:", error);
-      setMessage(`Error invalidating bet. Please try again. Details: ${error.message || error}`);
+      if (isError(error)) {
+        setMessage(`Error invalidating bet. Please try again. Details: ${error.message}`);
+      } else {
+        setMessage(`Error invalidating bet. Please try again. An unexpected error occurred.`);
+      }
       setIsAlertOpen(true);
     }
   };

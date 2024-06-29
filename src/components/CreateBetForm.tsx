@@ -1,7 +1,5 @@
-// components/CreateBetForm.js
 "use client";
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { prepareContractCall, createThirdwebClient } from "thirdweb";
 import { useSendTransaction, useActiveAccount } from "thirdweb/react";
 import { resolveAddress } from "thirdweb/extensions/ens";
 import { ethers } from "ethers";
@@ -9,6 +7,7 @@ import { client } from "@/app/client";
 import { Collapse } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import AlertModal from "./AlertModal";
+import { createBet } from "../generated/betFactory"; // Adjust the path as needed
 
 interface CreateBetFormProps {
   contract: any;
@@ -61,16 +60,19 @@ const CreateBetForm: React.FC<CreateBetFormProps> = ({ contract }) => {
       const wagerInEth = (parseFloat(wagerUSD) / ethToUsdRate).toFixed(18);
       const wagerInWei = ethers.utils.parseEther(wagerInEth);
 
-      const transaction = prepareContractCall({
+      const transaction = createBet({
         contract,
-        method: "function createBet(address _better1, address _better2, address _decider, uint256 _wager, string _conditions)",
-        params: [resolvedBetter1, resolvedBetter2, resolvedDecider, wagerInWei.toString(), conditions],
+        better1: resolvedBetter1,
+        better2: resolvedBetter2,
+        decider: resolvedDecider,
+        wager: BigInt(wagerInWei.toString()),
+        conditions,
       });
 
       await sendTransaction(transaction);
       setMessage("Bet created successfully!");
       setIsAlertOpen(true);
-      
+
       // Reset form fields and close form
       setBetter1(account?.address || "");
       setBetter2("");

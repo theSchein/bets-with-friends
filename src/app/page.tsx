@@ -19,7 +19,7 @@ export default function Home() {
   ];
 
   return (
-    <ThirdwebProvider client={client}>
+    <ThirdwebProvider>
       <main className="p-4 pb-10 min-h-[100vh] flex items-center justify-center container max-w-screen-lg mx-auto">
         <div className="py-20 text-center">
           <Image
@@ -33,7 +33,6 @@ export default function Home() {
           <div className="flex justify-center mb-20 font-heading">
             <ConnectButton
               client={client}
-              className="bg-primary"
               wallets={wallets}
               chain={defineChain(baseSepolia)}
               appMetadata={{
@@ -71,7 +70,7 @@ function Pitch() {
           Once each side pays the wager, the bet is on. Only the decider can pick a winner or cancel it to refund the betters.
         </p>
         <p className="text-lg md:text-xl text-font">
-          The decider doesn't get any of the money. They can only decide where the money goes.
+          The decider doesn&apos;t get any of the money. They can only decide where the money goes.
         </p>
       </div>
     </header>

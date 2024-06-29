@@ -16,6 +16,10 @@ interface UnfundedBetsProps {
   accountAddress: string;
 }
 
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
 const UnfundedBets: React.FC<UnfundedBetsProps> = ({
   betAddresses,
   accountAddress,
@@ -105,22 +109,25 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
         address: betAddress,
         chain: contract.chain,
       });
-
+  
       const transaction = fundBet({
         contract: betContract,
       });
-
-      await sendTransaction({ ...transaction, value: wagerWei });
+  
+      // Convert wagerWei to bigint
+      const wagerWeiBigInt = BigInt(wagerWei);
+  
+      await sendTransaction({ ...transaction, value: wagerWeiBigInt });
       setMessage("Bet funded successfully!");
       setIsAlertOpen(true);
       fetchBetDetails(); // Refresh bet details
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error funding bet:", error);
-      setMessage(
-        `Error funding bet. Please try again. Details: ${
-          error.message || error
-        }`
-      );
+      if (error instanceof Error) {
+        setMessage(`Error funding bet. Please try again. Details: ${error.message}`);
+      } else {
+        setMessage(`Error funding bet. Please try again. An unexpected error occurred.`);
+      }
       setIsAlertOpen(true);
     }
   };
@@ -132,22 +139,22 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
         address: betAddress,
         chain: contract.chain,
       });
-
+  
       const transaction = cancelBet({
         contract: betContract,
       });
-
+  
       await sendTransaction(transaction);
       setMessage("Bet canceled successfully!");
       setIsAlertOpen(true);
       fetchBetDetails(); // Refresh bet details
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error canceling bet:", error);
-      setMessage(
-        `Error canceling bet. Please try again. Details: ${
-          error.message || error
-        }`
-      );
+      if (error instanceof Error) {
+        setMessage(`Error canceling bet. Please try again. Details: ${error.message}`);
+      } else {
+        setMessage(`Error canceling bet. Please try again. An unexpected error occurred.`);
+      }
       setIsAlertOpen(true);
     }
   };
