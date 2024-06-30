@@ -1,47 +1,32 @@
-## Getting Started
+# Bets with Friends
 
-Create a project using this example:
+The P2P betting app for the groupchat
+'Submission for Onchain Summer 2024'
 
-```bash
-npx thirdweb create --contract --template hardhat-javascript-starter
-```
+https://www.betswithfriends.fun/
 
-You can start editing the page by modifying `contracts/Contract.sol`.
+## The stack
 
-To add functionality to your contracts, you can use the `@thirdweb-dev/contracts` package which provides base contracts and extensions to inherit. The package is already installed with this project. Head to our [Contracts Extensions Docs](https://portal.thirdweb.com/contractkit) to learn more.
+This uses NextJS written in TypeScipt for the application, and is hosted on Vercel. The smart contracts are deployed by Thirdweb and Thirdweb apis are used to interact with the conracts on the application layer. Coinbase Smart Wallet is also used as an option to sign-in making this easy for the mobile use. Contracts are deployed on running on Base Seppolia testnet. 
 
-## Building the project
+## How it works
 
-After any changes to the contract, run:
+After signing in with a web3 wallet the user can make a bet. The bet consists of:
+- Bettors 1 & 2: The two parties making the bet
+- Decider: The one determining who one and has the ability to can cancel and refund
+- Wager: Collected in ETH
+- Conditions: A short blurb on what the bet is on, is open ended and up to all parties
 
-```bash
-npm run build
-# or
-yarn build
-```
+When a bet is created its status becomes Unfunded. Each better has to put in the wager amount before the betting is Active and locked. When a bet is unfunded or partially funded any of the 3 parties may cancel the bet and refund the money.
 
-to compile your contracts. This will also detect the [Contracts Extensions Docs](https://portal.thirdweb.com/contractkit) detected on your contract.
+After a bet has been fully funded it is now locked out to better 1 and 2, they may see it but only the decider can choose who gets the money or if the bet is to be cancelled. The truth is fully and completely trusted to the decider, I call this system a 'dictatorial oracle' and while the decider doesn't make any money on the bets either way, they sure do get a power trip.
 
-## Deploying Contracts
+After a bet is settled, its metrics are tracked. Users can track their wins/losses and whether they are in the black overall. 
 
-When you're ready to deploy your contracts, just run one of the following command to deploy you're contracts:
+## Feedback
 
-```bash
-npm run deploy
-# or
-yarn deploy
-```
+I think this is a cool idea that my friends that don't even like crypto would love to use, and it only needs a little bit more work to be a full product. If you are interested in getting access to the base mainnet beta that I'll be launching, want to get involved, give feedback, or just wanna say hi please hit me up on telegram:
 
-## Releasing Contracts
+https://t.me/schein_berg
 
-If you want to release a version of your contracts publicly, you can use one of the followings command:
 
-```bash
-npm run release
-# or
-yarn release
-```
-
-## Join our Discord!
-
-For any questions, suggestions, join our discord at [https://discord.gg/thirdweb](https://discord.gg/thirdweb).
