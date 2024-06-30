@@ -10,6 +10,7 @@ import { bet, fundBet, cancelBet } from "../generated/bet";
 import { resolveName } from "thirdweb/extensions/ens";
 import { Collapse } from "@mui/material";
 import AlertModal from "./AlertModal";
+import ShareButton from "./ShareButton";
 
 interface UnfundedBetsProps {
   betAddresses: string[];
@@ -270,10 +271,19 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
               )}
               <button
                 onClick={() => handleCancelBet(bet.address)}
-                className="w-full p-2 bg-red-500 text-font font-heading rounded-lg mt-2 hover:bg-red-400 transition-colors"
+                className="w-full p-2 mb-2 bg-red-500 text-font font-heading rounded-lg mt-2 hover:bg-red-400 transition-colors"
               >
                 Cancel Bet
               </button>
+              <ShareButton
+                better1Display={bet.better1Display}
+                better2Display={bet.better2Display}
+                deciderDisplay={bet.deciderDisplay}
+                wagerEth={bet.wagerEth}
+                status={bet.status}
+                conditions={bet.conditions}
+                ethToUsdRate={ethToUsdRate}
+              />
             </div>
           );
         })}

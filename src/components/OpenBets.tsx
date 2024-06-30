@@ -8,8 +8,9 @@ import { ethers } from "ethers";
 import { client, contract } from "@/app/client";
 import { bet, resolveBet, invalidateBet } from "../generated/bet";
 import { resolveName } from "thirdweb/extensions/ens";
-import { Collapse } from "@mui/material"; 
+import { Collapse } from "@mui/material";
 import AlertModal from "./AlertModal";
+import ShareButton from "./ShareButton";
 
 interface OpenBetsProps {
   betAddresses: string[];
@@ -20,7 +21,10 @@ function isError(error: unknown): error is Error {
   return error instanceof Error;
 }
 
-const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => {
+const OpenBets: React.FC<OpenBetsProps> = ({
+  betAddresses,
+  accountAddress,
+}) => {
   const [betDetails, setBetDetails] = useState<any[]>([]);
   const address = accountAddress.toLowerCase();
   const { mutateAsync: sendTransaction } = useSendTransaction();
@@ -31,7 +35,9 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
 
   const fetchEthToUsdRate = async () => {
     try {
-      const response = await fetch("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD");
+      const response = await fetch(
+        "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD"
+      );
       const data = await response.json();
       setEthToUsdRate(data.USD);
     } catch (error) {
@@ -68,7 +74,9 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
             decider: betData[2],
             deciderDisplay: decider || betData[2],
             wagerWei: betData[3].toString(),
-            wagerEth: parseFloat(ethers.utils.formatEther(betData[3])).toFixed(4), // Rounded to 4 decimals
+            wagerEth: parseFloat(ethers.utils.formatEther(betData[3])).toFixed(
+              4
+            ), // Rounded to 4 decimals
             conditions: betData[4],
             status: betData[5],
           });
@@ -89,22 +97,27 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
     fetchBetDetails();
   }, [betAddresses, address]);
 
-  const handleResolveBet = async (betAddress: string, winnerAddress: string) => {
+  const handleResolveBet = async (
+    betAddress: string,
+    winnerAddress: string
+  ) => {
     try {
       const betContract = getContract({
         client,
         address: betAddress,
         chain: contract.chain,
       });
-  
+
       // Ensure the winnerAddress is a valid Ethereum address
-      const formattedWinnerAddress = ethers.utils.getAddress(winnerAddress) as `0x${string}`;
-  
+      const formattedWinnerAddress = ethers.utils.getAddress(
+        winnerAddress
+      ) as `0x${string}`;
+
       const transaction = resolveBet({
         contract: betContract,
         winner: formattedWinnerAddress,
       });
-  
+
       await sendTransaction(transaction);
       setMessage("Bet resolved successfully!");
       setIsAlertOpen(true);
@@ -112,9 +125,13 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
     } catch (error: unknown) {
       console.error("Error resolving bet:", error);
       if (isError(error)) {
-        setMessage(`Error resolving bet. Please try again. Details: ${error.message}`);
+        setMessage(
+          `Error resolving bet. Please try again. Details: ${error.message}`
+        );
       } else {
-        setMessage(`Error resolving bet. Please try again. An unexpected error occurred.`);
+        setMessage(
+          `Error resolving bet. Please try again. An unexpected error occurred.`
+        );
       }
       setIsAlertOpen(true);
     }
@@ -127,11 +144,11 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
         address: betAddress,
         chain: contract.chain,
       });
-  
+
       const transaction = invalidateBet({
         contract: betContract,
       });
-  
+
       await sendTransaction(transaction);
       setMessage("Bet invalidated successfully!");
       setIsAlertOpen(true);
@@ -139,42 +156,66 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
     } catch (error: unknown) {
       console.error("Error invalidating bet:", error);
       if (isError(error)) {
-        setMessage(`Error invalidating bet. Please try again. Details: ${error.message}`);
+        setMessage(
+          `Error invalidating bet. Please try again. Details: ${error.message}`
+        );
       } else {
-        setMessage(`Error invalidating bet. Please try again. An unexpected error occurred.`);
+        setMessage(
+          `Error invalidating bet. Please try again. An unexpected error occurred.`
+        );
       }
       setIsAlertOpen(true);
     }
   };
 
-  const shortenAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const shortenAddress = (address: string) =>
+    `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   return (
     <div className="max-w-md mx-auto my-4 p-4 bg-primary text-quaternary rounded-lg shadow-lg">
-      <h3 className="text-lg font-bold mb-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <h3
+        className="text-lg font-bold mb-2 cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         Active Bets
       </h3>
       <Collapse in={isOpen}>
         {betDetails.map((bet, index) => {
-          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(2);
+          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(
+            2
+          );
 
           return (
-            <div key={index} className="p-4 mb-4 bg-secondary rounded-lg shadow-md">
-              <h4 className="text-xl font-bold mb-2 text-font">{bet.conditions}</h4>
+            <div
+              key={index}
+              className="p-4 mb-4 bg-secondary rounded-lg shadow-md"
+            >
+              <h4 className="text-xl font-bold mb-2 text-font">
+                {bet.conditions}
+              </h4>
               <div className="grid grid-cols-1 gap-4 mb-2">
                 <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
                   <span>
-                    Better 1: {bet.better1Display.endsWith('.eth') ? bet.better1Display : shortenAddress(bet.better1Display)}
+                    Better 1:{" "}
+                    {bet.better1Display.endsWith(".eth")
+                      ? bet.better1Display
+                      : shortenAddress(bet.better1Display)}
                   </span>
                 </div>
                 <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
                   <span>
-                    Better 2: {bet.better2Display.endsWith('.eth') ? bet.better2Display : shortenAddress(bet.better2Display)}
+                    Better 2:{" "}
+                    {bet.better2Display.endsWith(".eth")
+                      ? bet.better2Display
+                      : shortenAddress(bet.better2Display)}
                   </span>
                 </div>
                 <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
                   <span>
-                    Decider: {bet.deciderDisplay.endsWith('.eth') ? bet.deciderDisplay : shortenAddress(bet.deciderDisplay)}
+                    Decider:{" "}
+                    {bet.deciderDisplay.endsWith(".eth")
+                      ? bet.deciderDisplay
+                      : shortenAddress(bet.deciderDisplay)}
                   </span>
                 </div>
               </div>
@@ -205,13 +246,28 @@ const OpenBets: React.FC<OpenBetsProps> = ({ betAddresses, accountAddress }) => 
                   </button>
                 </div>
               ) : (
-                <p className="text-font mt-2 text-center italic">Waiting for the decider to resolve the bet.</p>
+                <p className="text-font mb-2 mt-2 text-center italic">
+                  Waiting for the decider to resolve the bet.
+                </p>
               )}
+              <ShareButton
+                better1Display={bet.better1Display}
+                better2Display={bet.better2Display}
+                deciderDisplay={bet.deciderDisplay}
+                wagerEth={bet.wagerEth}
+                status={bet.status}
+                conditions={bet.conditions}
+                ethToUsdRate={ethToUsdRate}
+              />
             </div>
           );
         })}
       </Collapse>
-      <AlertModal isOpen={isAlertOpen} message={message} onClose={() => setIsAlertOpen(false)} />
+      <AlertModal
+        isOpen={isAlertOpen}
+        message={message}
+        onClose={() => setIsAlertOpen(false)}
+      />
     </div>
   );
 };
