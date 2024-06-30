@@ -1,4 +1,4 @@
-![Logo](public/logo.png)
+![Logo](public/bets.png)
 
 # Bets with Friends
 
