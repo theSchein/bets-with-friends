@@ -85,7 +85,9 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
             decider: decider,
             deciderDisplay: deciderens || decider,
             wagerWei: betData[3].toString(),
-            wagerEth: parseFloat(ethers.utils.formatEther(betData[3])).toFixed(4), // Rounded to 4 decimals
+            wagerEth: parseFloat(ethers.utils.formatEther(betData[3])).toFixed(
+              4
+            ), // Rounded to 4 decimals
             conditions: betData[4],
             status: betData[5],
           });
@@ -109,24 +111,28 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
         address: betAddress,
         chain: contract.chain,
       });
-  
+
       const transaction = fundBet({
         contract: betContract,
       });
-  
+
       // Convert wagerWei to bigint
       const wagerWeiBigInt = BigInt(wagerWei);
-  
+
       await sendTransaction({ ...transaction, value: wagerWeiBigInt });
       setMessage("Bet funded successfully!");
       setIsAlertOpen(true);
-      fetchBetDetails(); // Refresh bet details
+      fetchBetDetails();
     } catch (error: unknown) {
       console.error("Error funding bet:", error);
       if (error instanceof Error) {
-        setMessage(`Error funding bet. Please try again. Details: ${error.message}`);
+        setMessage(
+          `Error funding bet. Please try again. Details: ${error.message}`
+        );
       } else {
-        setMessage(`Error funding bet. Please try again. An unexpected error occurred.`);
+        setMessage(
+          `Error funding bet. Please try again. An unexpected error occurred.`
+        );
       }
       setIsAlertOpen(true);
     }
@@ -139,11 +145,11 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
         address: betAddress,
         chain: contract.chain,
       });
-  
+
       const transaction = cancelBet({
         contract: betContract,
       });
-  
+
       await sendTransaction(transaction);
       setMessage("Bet canceled successfully!");
       setIsAlertOpen(true);
@@ -151,9 +157,13 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
     } catch (error: unknown) {
       console.error("Error canceling bet:", error);
       if (error instanceof Error) {
-        setMessage(`Error canceling bet. Please try again. Details: ${error.message}`);
+        setMessage(
+          `Error canceling bet. Please try again. Details: ${error.message}`
+        );
       } else {
-        setMessage(`Error canceling bet. Please try again. An unexpected error occurred.`);
+        setMessage(
+          `Error canceling bet. Please try again. An unexpected error occurred.`
+        );
       }
       setIsAlertOpen(true);
     }
@@ -171,9 +181,9 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
       case 0:
         return "Unfunded";
       case 1:
-        return `Partially Funded (${(better1)} has funded)`;
+        return `Partially Funded (${better1} has funded)`;
       case 2:
-        return `Partially Funded (${(better2)} has funded)`;
+        return `Partially Funded (${better2} has funded)`;
       default:
         return "Unknown Status";
     }
@@ -189,7 +199,9 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
       </h3>
       <Collapse in={isOpen}>
         {betDetails.map((bet, index) => {
-          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(2);
+          const wagerInUsd = (parseFloat(bet.wagerEth) * ethToUsdRate).toFixed(
+            2
+          );
           const canFund =
             (address === bet.better1.toLowerCase() && bet.status !== 1) ||
             (address === bet.better2.toLowerCase() && bet.status !== 2);
@@ -199,7 +211,9 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
               key={index}
               className="p-4 mb-4 bg-secondary rounded-lg shadow-md"
             >
-              <h4 className="text-xl font-bold mb-2 text-font">{bet.conditions}</h4>
+              <h4 className="text-xl font-bold mb-2 text-font">
+                {bet.conditions}
+              </h4>
               <div className="grid grid-cols-1 gap-4 mb-2">
                 <div className="p-4 bg-yellow-300 text-font rounded-lg shadow-md">
                   <span>
@@ -231,7 +245,15 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
               </div>
               <div className="mb-2">
                 <span className="inline-block px-4 py-2 bg-blue-500 text-white rounded-full">
-                  {getBetStatusText(bet.status, bet.better1Display, bet.better2Display)}
+                  {getBetStatusText(
+                    bet.status,
+                    bet.better1Display.endsWith(".eth")
+                      ? bet.better1Display
+                      : shortenAddress(bet.better1Display),
+                    bet.better2Display.endsWith(".eth")
+                      ? bet.better2Display
+                      : shortenAddress(bet.better2Display)
+                  )}
                 </span>
               </div>
               {canFund ? (
@@ -256,7 +278,11 @@ const UnfundedBets: React.FC<UnfundedBetsProps> = ({
           );
         })}
       </Collapse>
-      <AlertModal isOpen={isAlertOpen} message={message} onClose={() => setIsAlertOpen(false)} />
+      <AlertModal
+        isOpen={isAlertOpen}
+        message={message}
+        onClose={() => setIsAlertOpen(false)}
+      />
     </div>
   );
 };
